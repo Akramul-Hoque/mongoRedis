@@ -6,30 +6,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiError> handleNotFound(ResourceNotFoundException ex) {
-        ApiError error = new ApiError(
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage(),
-                LocalDateTime.now()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    public ResponseEntity<ApiResponse<Void>> handleNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse<>(false, null, ex.getMessage()));
     }
 
     @ExceptionHandler(InvalidRequestException.class)
-    public ResponseEntity<ApiError> handleInvalidRequest(InvalidRequestException ex) {
-        ApiError error = new ApiError(
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
-                LocalDateTime.now()
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    public ResponseEntity<ApiResponse<Void>> handleInvalidRequest(InvalidRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, null, ex.getMessage()));
     }
 
     @ExceptionHandler(CustomServiceException.class)

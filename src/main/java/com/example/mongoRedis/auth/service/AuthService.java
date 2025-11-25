@@ -8,7 +8,7 @@ import com.example.mongoRedis.auth.dto.response.RefreshTokenResponse;
 import com.example.mongoRedis.common.response.ApiResponse;
 
 public interface AuthService {
-    ApiResponse<Void> signup(SignupRequest request);
+//    ApiResponse<Void> signup(SignupRequest request);
 
     ApiResponse<LoginResponse> login(LoginRequest request);
 

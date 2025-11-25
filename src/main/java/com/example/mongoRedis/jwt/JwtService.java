@@ -3,43 +3,66 @@ package com.example.mongoRedis.jwt;
 import com.example.mongoRedis.user.dto.model.User;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "vsfgrgewrgrgergsrgergwegger";
-    private static final long ACCESS_TOKEN_EXPIRY = 1000 * 60 * 15; // 15 mins
-    private static final long REFRESH_TOKEN_EXPIRY = 1000 * 60 * 60 * 24 * 7; // 7 days
+    @Value("${jwt.secret-key:+3Wc1bNf2jH4oL2tQvB3hF8nQ6yZfVbJ2cI0pWlFfX4=}")
+    private String secretKey;
+
+    @Value("${jwt.access-token-expiry:900000}") // 15 minutes in ms
+    private long accessTokenExpiry;
+
+    @Value("${jwt.refresh-token-expiry:604800000}") // 7 days in ms
+    private long refreshTokenExpiry;
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
 
     public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getId())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .subject(user.getId())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + accessTokenExpiry))
+                .signWith(getSigningKey())
                 .compact();
     }
 
     public String generateRefreshToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getId())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .subject(user.getId())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiry))
+                .signWith(getSigningKey())
                 .compact();
     }
 
     public String extractUserId(String token) {
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
+        try {
+            return Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
+        } catch (JwtException e) {
+            return null;
+        }
     }
 
     public boolean isTokenValid(String token) {
         try {
-            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
+            Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token);
             return true;
         } catch (JwtException e) {
             return false;

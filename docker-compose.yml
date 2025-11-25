@@ -1,0 +1,84 @@
+version: '3.9'
+
+services:
+  # MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: mongoredis-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: mongoRedis
+      SPRING_PROFILES_ACTIVE: docker
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - mongoredis-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7.2-alpine
+    container_name: mongoredis-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - mongoredis-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Spring Boot App
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mongoredis-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8080
+      JWT_SECRET: your-super-secret-jwt-key
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mongoredis-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/school/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+# Networks
+networks:
+  mongoredis-network:
+    driver: bridge
+
+# Volumes
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+  redis_data:
+    driver: local

@@ -23,7 +23,7 @@ public class UserResponse {
     private int age;
 
     private UserType userType;
-    private Credentials credentials;     // optional, login info
-    private List<Address> addresses;     // optional
+    private Credentials credentials;
+    private List<Address> addresses;
     private Guardian guardian;
 }

@@ -28,16 +28,6 @@ public class AuthServiceImpl implements AuthService{
     private final RedisTokenService redisTokenService;
 
     @Override
-    public ApiResponse<Void> signup(SignupRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new CustomServiceException("User with this email already exists");
-        }
-        User user = mapToUserEntity(request);
-        userRepository.save(user);
-        return new ApiResponse<>(true, null, "User registered successfully");
-    }
-
-    @Override
     public ApiResponse<LoginResponse> login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomServiceException("Invalid email or password"));
@@ -49,12 +39,12 @@ public class AuthServiceImpl implements AuthService{
         String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
+        redisTokenService.storeAccessToken(user.getId(), accessToken);
         redisTokenService.storeRefreshToken(user.getId(), refreshToken);
 
         LoginResponse response = LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .message("Login successful")
                 .build();
 
         return new ApiResponse<>(true, response, "Login successful");
@@ -71,15 +61,19 @@ public class AuthServiceImpl implements AuthService{
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomServiceException("User not found"));
 
+        if (!redisTokenService.isRefreshTokenValid(userId, request.getRefreshToken())) {
+            throw new CustomServiceException("Invalid or expired refresh token");
+        }
+
         String newAccessToken = jwtService.generateToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
 
+        redisTokenService.storeAccessToken(userId, newAccessToken);
         redisTokenService.storeRefreshToken(userId, newRefreshToken);
 
         RefreshTokenResponse response = RefreshTokenResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
-                .message("Token refreshed successfully")
                 .build();
 
         return new ApiResponse<>(true, response, "Token refreshed successfully");
@@ -88,23 +82,24 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public ApiResponse<Void> logout(String token) {
         String userId = jwtService.extractUserId(token);
+        redisTokenService.deleteAccessToken(userId);
         redisTokenService.deleteRefreshToken(userId);
         return new ApiResponse<>(true, null, "Successfully logged out");
     }
 
-    private User mapToUserEntity(SignupRequest request) {
-        Credentials credentials = Credentials.builder()
-                .username(request.getEmail())
-                .password(passwordEncoder.encryptPassword(request.getPassword()))
-                .roles(List.of("ROLE_" + request.getUserType().name()))
-                .build();
-
-        return User.builder()
-                .name(request.getName())
-                .email(request.getEmail())
-                .age(request.getAge())
-                .userType(request.getUserType())
-                .credentials(credentials)
-                .build();
-    }
+//    private User mapToUserEntity(SignupRequest request) {
+//        Credentials credentials = Credentials.builder()
+//                .username(request.getEmail())
+//                .password(passwordEncoder.encryptPassword(request.getPassword()))
+//                .roles(List.of("ROLE_" + request.getUserType().name()))
+//                .build();
+//
+//        return User.builder()
+//                .name(request.getName())
+//                .email(request.getEmail())
+//                .age(request.getAge())
+//                .userType(request.getUserType())
+//                .credentials(credentials)
+//                .build();
+//    }
 }

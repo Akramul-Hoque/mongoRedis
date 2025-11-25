@@ -37,7 +37,6 @@ public class UserServiceImplementation implements UserService{
     @CachePut(value = "users", key = "#result.id")
     public UserResponse createUser(UserRequest request) {
 
-        // Null-safe email check
         if (request.getEmail() != null && !request.getEmail().isEmpty()) {
             userRepository.findByEmail(request.getEmail())
                     .ifPresent(u -> { throw new CustomServiceException("Email already exists"); });

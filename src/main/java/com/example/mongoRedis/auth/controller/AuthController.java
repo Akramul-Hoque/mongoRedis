@@ -2,14 +2,12 @@ package com.example.mongoRedis.auth.controller;
 
 import com.example.mongoRedis.auth.dto.request.LoginRequest;
 import com.example.mongoRedis.auth.dto.request.RefreshTokenRequest;
-import com.example.mongoRedis.auth.dto.request.SignupRequest;
 import com.example.mongoRedis.auth.dto.response.LoginResponse;
 import com.example.mongoRedis.auth.dto.response.RefreshTokenResponse;
 import com.example.mongoRedis.auth.service.AuthService;
 import com.example.mongoRedis.common.ApiEndpoints.ApiEndpoints;
 import com.example.mongoRedis.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-
-    @PostMapping(ApiEndpoints.Auth.SIGNUP)
-    public ResponseEntity<ApiResponse<Void>> signup(@RequestBody SignupRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(authService.signup(request));
-    }
 
     @PostMapping(ApiEndpoints.Auth.LOGIN)
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest request) {
@@ -42,4 +34,3 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponse<>(true, null, "Successfully logged out"));
     }
 }
-

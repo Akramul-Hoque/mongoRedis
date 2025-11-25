@@ -16,6 +16,6 @@ public final class ApiEndpoints {
         public static final String BASE = "/users";
         public static final String GET = BASE + "/{id}";
         public static final String CREATE = BASE + "/create";
+        public static final String GET_ALL = BASE + "/all-users";
     }
-    // add more endpoints here
 }
