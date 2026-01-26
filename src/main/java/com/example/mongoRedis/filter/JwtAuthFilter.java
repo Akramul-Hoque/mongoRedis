@@ -32,8 +32,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         String path = request.getRequestURI();
 
@@ -61,8 +61,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userId, null, null);
+                String role = jwtService.extractUserType(token);
+                java.util.List<org.springframework.security.core.GrantedAuthority> authorities = java.util.Collections
+                        .singletonList(
+                                new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role));
+
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userId, null,
+                        authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
@@ -78,7 +83,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     // Only check if the path contains keywords for whitelisted endpoints
     private boolean isWhitelisted(String path) {
-        return path.contains("/auth/") || path.contains("/swagger") || path.contains("/v3/api-docs") || path.contains("/webjars") || path.contains("/actuator");
+        return path.contains("/auth/") || path.contains("school/users/create") || path.contains("/swagger")
+                || path.contains("/v3/api-docs") || path.contains("/webjars") || path.contains("/actuator");
     }
 
     private void sendApiError(HttpServletResponse response, int status, String message) throws IOException {

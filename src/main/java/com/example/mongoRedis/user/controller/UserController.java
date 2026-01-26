@@ -7,7 +7,7 @@ import com.example.mongoRedis.user.dto.response.UserResponse;
 import com.example.mongoRedis.user.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 public class UserController {
@@ -19,7 +19,7 @@ public class UserController {
     }
 
     @PostMapping(ApiEndpoints.User.CREATE)
-    public ApiResponse<UserResponse> createUser(@RequestBody UserRequest request) {
+    public ApiResponse<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
         return new ApiResponse<>(true, userService.createUser(request), "User created successfully");
     }
 
@@ -29,12 +29,13 @@ public class UserController {
     }
 
     @GetMapping(ApiEndpoints.User.GET_ALL)
-    public ApiResponse<List<UserResponse>> getAllUsers() {
-        return new ApiResponse<>(true, userService.getAllUsers(), "Users retrieved successfully");
+    public ApiResponse<org.springframework.data.domain.Page<UserResponse>> getAllUsers(
+            org.springframework.data.domain.Pageable pageable) {
+        return new ApiResponse<>(true, userService.getAllUsers(pageable), "Users retrieved successfully");
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<UserResponse> updateUser(@PathVariable String id, @RequestBody UserRequest request) {
+    public ApiResponse<UserResponse> updateUser(@PathVariable String id, @Valid @RequestBody UserRequest request) {
         return new ApiResponse<>(true, userService.updateUser(id, request), "User updated successfully");
     }
 

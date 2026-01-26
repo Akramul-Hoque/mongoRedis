@@ -18,15 +18,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
 @Service
-public class UserServiceImplementation implements UserService{
+public class UserServiceImplementation implements UserService {
     private final UserRepository userRepository;
     private final StudentCourseRepository studentCourseRepository;
     private final TeacherClassRepository teacherClassRepository;
     private final CacheManager cacheManager;
 
-    public UserServiceImplementation(UserRepository userRepository, StudentCourseRepository studentCourseRepository, TeacherClassRepository teacherClassRepository, CacheManager cacheManager) {
+    public UserServiceImplementation(UserRepository userRepository, StudentCourseRepository studentCourseRepository,
+            TeacherClassRepository teacherClassRepository, CacheManager cacheManager) {
         this.userRepository = userRepository;
         this.studentCourseRepository = studentCourseRepository;
         this.teacherClassRepository = teacherClassRepository;
@@ -39,7 +40,9 @@ public class UserServiceImplementation implements UserService{
 
         if (request.getEmail() != null && !request.getEmail().isEmpty()) {
             userRepository.findByEmail(request.getEmail())
-                    .ifPresent(u -> { throw new CustomServiceException("Email already exists"); });
+                    .ifPresent(u -> {
+                        throw new CustomServiceException("Email already exists");
+                    });
         }
 
         User user = User.builder()
@@ -73,15 +76,22 @@ public class UserServiceImplementation implements UserService{
 
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
             userRepository.findByEmail(request.getEmail())
-                    .ifPresent(u -> { throw new CustomServiceException("Email already exists"); });
+                    .ifPresent(u -> {
+                        throw new CustomServiceException("Email already exists");
+                    });
             user.setEmail(request.getEmail());
         }
 
-        if (request.getName() != null) user.setName(request.getName());
-        if (request.getAge() > 0) user.setAge(request.getAge());
-        if (request.getAddresses() != null) user.setAddresses(request.getAddresses());
-        if (request.getGuardian() != null) user.setGuardian(request.getGuardian());
-        if (request.getCredentials() != null) user.setCredentials(request.getCredentials());
+        if (request.getName() != null)
+            user.setName(request.getName());
+        if (request.getAge() > 0)
+            user.setAge(request.getAge());
+        if (request.getAddresses() != null)
+            user.setAddresses(request.getAddresses());
+        if (request.getGuardian() != null)
+            user.setGuardian(request.getGuardian());
+        if (request.getCredentials() != null)
+            user.setCredentials(request.getCredentials());
 
         User updatedUser = userRepository.save(user);
         return mapToResponse(updatedUser);
@@ -90,15 +100,16 @@ public class UserServiceImplementation implements UserService{
     // ---------------- DELETE USER ----------------
     @CacheEvict(value = "users", key = "#id")
     public void deleteUser(String id) {
-        if (!userRepository.existsById(id)) throw new RuntimeException("User not found");
+        if (!userRepository.existsById(id))
+            throw new RuntimeException("User not found");
         userRepository.deleteById(id);
     }
 
     // ---------------- GET ALL USERS ----------------
-//    @Cacheable(value = "users", key = "'allUsers'")
-    public List<UserResponse> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream().map(this::mapToResponse).collect(Collectors.toList());
+    public org.springframework.data.domain.Page<UserResponse> getAllUsers(
+            org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<User> userPage = userRepository.findAll(pageable);
+        return userPage.map(this::mapToResponse);
     }
 
     // ---------------- STUDENT COURSES ----------------

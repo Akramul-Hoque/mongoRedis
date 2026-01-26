@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import java.util.List;
 
 @Data
@@ -16,12 +18,23 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class UserRequest {
+    @NotBlank(message = "Name is required")
     private String name;
+
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email is required")
     private String email;
+
+    @Min(value = 1, message = "Age must be at least 1")
     private int age;
 
+    @NotNull(message = "User type is required")
     private UserType userType;
-    private Credentials credentials;     // optional, login info
-    private List<Address> addresses;     // optional
-    private Guardian guardian;           // optional, only for students
+
+    @Valid
+    private Credentials credentials; // optional, login info
+    private List<Address> addresses; // optional
+
+    @Valid
+    private Guardian guardian; // optional, only for students
 }
