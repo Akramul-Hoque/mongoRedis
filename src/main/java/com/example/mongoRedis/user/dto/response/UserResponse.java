@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,10 +21,24 @@ public class UserResponse {
     private String id;
     private String name;
     private String email;
+    private String phone;
     private int age;
-
     private UserType userType;
     private Credentials credentials;
     private List<Address> addresses;
     private Guardian guardian;
+    
+    // Enhanced fields for school management
+    private boolean isActive;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime lastLoginAt;
+    private String academicYear;
+    private String studentId;
+    private String employeeId;
+    private String department;
+    private List<String> enrolledCourses;
+    private List<String> assignedCourses;
+    private String grade;
+    private String section;
 }

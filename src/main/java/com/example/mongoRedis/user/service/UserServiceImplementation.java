@@ -2,11 +2,15 @@ package com.example.mongoRedis.user.service;
 
 import com.example.mongoRedis.common.UserType;
 import com.example.mongoRedis.exception.CustomServiceException;
+import com.example.mongoRedis.exception.ResourceNotFoundException;
+import com.example.mongoRedis.user.controller.AdminUserController;
+import com.example.mongoRedis.user.controller.ProfileController;
 import com.example.mongoRedis.user.dto.model.StudentCourse;
 import com.example.mongoRedis.user.dto.model.TeacherClass;
 import com.example.mongoRedis.user.dto.model.User;
-import com.example.mongoRedis.user.dto.request.UserRequest;
+import com.example.mongoRedis.user.dto.request.*;
 import com.example.mongoRedis.user.dto.response.UserResponse;
+import com.example.mongoRedis.user.dto.response.UserSummaryResponse;
 import com.example.mongoRedis.user.repository.StudentCourseRepository;
 import com.example.mongoRedis.user.repository.TeacherClassRepository;
 import com.example.mongoRedis.user.repository.UserRepository;
@@ -14,6 +18,8 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -59,12 +65,27 @@ public class UserServiceImplementation implements UserService {
         return mapToResponse(savedUser);
     }
 
+    @Override
+    public UserResponse createUser(UserCreateRequest request) {
+        return null;
+    }
+
     // ---------------- GET USER BY ID ----------------
     @Cacheable(value = "users", key = "#id")
     public UserResponse getUserById(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return mapToResponse(user);
+    }
+
+    @Override
+    public Page<UserSummaryResponse> getAllUsers(Pageable pageable, UserType userType, Boolean isActive) {
+        return null;
+    }
+
+    @Override
+    public UserResponse updateUser(String id, UserUpdateRequest request) {
+        return null;
     }
 
     // ---------------- UPDATE USER ----------------
@@ -101,8 +122,53 @@ public class UserServiceImplementation implements UserService {
     @CacheEvict(value = "users", key = "#id")
     public void deleteUser(String id) {
         if (!userRepository.existsById(id))
-            throw new RuntimeException("User not found");
+            throw new ResourceNotFoundException("User not found");
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public void activateUser(String id) {
+
+    }
+
+    @Override
+    public void deactivateUser(String id) {
+
+    }
+
+    @Override
+    public List<UserSummaryResponse> getUsersSummary(UserType userType, int limit) {
+        return List.of();
+    }
+
+    @Override
+    public Page<UserSummaryResponse> searchUsers(String query, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public AdminUserController.UserStatisticsResponse getUserStatistics() {
+        return null;
+    }
+
+    @Override
+    public UserResponse getCurrentUserProfile() {
+        return null;
+    }
+
+    @Override
+    public UserResponse updateCurrentUserProfile(ProfileUpdateRequest request) {
+        return null;
+    }
+
+    @Override
+    public void changePassword(PasswordChangeRequest request) {
+
+    }
+
+    @Override
+    public ProfileController.ProfileDashboardResponse getProfileDashboardInfo() {
+        return null;
     }
 
     // ---------------- GET ALL USERS ----------------

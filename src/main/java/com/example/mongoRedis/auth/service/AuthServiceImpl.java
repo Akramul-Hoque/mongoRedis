@@ -28,11 +28,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomServiceException("Invalid email or password"));
 
-        // if (!passwordEncoder.matches(request.getPassword(),
-        // user.getCredentials().getPassword())) {
-        // throw new CustomServiceException("Invalid email or password");
-        // }
-        if (!request.getPassword().equals(user.getCredentials().getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getCredentials().getPassword())) {
             throw new CustomServiceException("Invalid email or password");
         }
 
@@ -61,9 +57,10 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomServiceException("User not found"));
 
-        if (!redisTokenService.isRefreshTokenValid(userId, request.getRefreshToken())) {
-            throw new CustomServiceException("Invalid or expired refresh token");
-        }
+        // Remove redundant validation - already checked above
+        // if (!redisTokenService.isRefreshTokenValid(userId, request.getRefreshToken())) {
+        //     throw new CustomServiceException("Invalid or expired refresh token");
+        // }
 
         String newAccessToken = jwtService.generateToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
@@ -92,19 +89,4 @@ public class AuthServiceImpl implements AuthService {
         return new ApiResponse<>(true, null, "Successfully logged out");
     }
 
-    // private User mapToUserEntity(SignupRequest request) {
-    // Credentials credentials = Credentials.builder()
-    // .username(request.getEmail())
-    // .password(passwordEncoder.encryptPassword(request.getPassword()))
-    // .roles(List.of("ROLE_" + request.getUserType().name()))
-    // .build();
-    //
-    // return User.builder()
-    // .name(request.getName())
-    // .email(request.getEmail())
-    // .age(request.getAge())
-    // .userType(request.getUserType())
-    // .credentials(credentials)
-    // .build();
-    // }
 }

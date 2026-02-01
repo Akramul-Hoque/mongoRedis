@@ -13,7 +13,7 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret-key:+3Wc1bNf2jH4oL2tQvB3hF8nQ6yZfVbJ2cI0pWlFfX4=}")
+    @Value("${JWT_SECRET:default-secret-key-for-development-only-change-in-production}")
     private String secretKey;
 
     @Value("${jwt.access-token-expiry:900000}") // 15 minutes in ms

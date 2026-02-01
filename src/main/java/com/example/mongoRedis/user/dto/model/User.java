@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -25,6 +26,8 @@ public class User {
     @Indexed(unique = true, sparse = true)
     private String email;
 
+    private String phone;
+
     private int age;
 
     private UserType userType;
@@ -34,4 +37,18 @@ public class User {
     private List<Address> addresses;
 
     private Guardian guardian;
+
+    // Enhanced fields for school management
+    private boolean isActive = true;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime lastLoginAt;
+    private String academicYear;
+    private String studentId; // For students
+    private String employeeId; // For teachers/staff
+    private String department; // For teachers/staff
+    private List<String> enrolledCourses; // For students
+    private List<String> assignedCourses; // For teachers
+    private String grade; // For students
+    private String section; // For students
 }
